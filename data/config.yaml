@@ -1,0 +1,12 @@
+gateway:
+  listenAddr: localhost:8000
+  routes:
+    - name: Auth
+      context: /auth
+      target: http://localhost:8001
+    - name: Msg
+      context: /msg
+      target: http://localhost:8002
+    - name: Order
+      context: /order
+      target: http://localhost:8003
