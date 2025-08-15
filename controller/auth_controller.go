@@ -5,6 +5,7 @@ import (
 	"go-micro/service"
 	helper "go-micro/utils"
 	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,31 +35,29 @@ func (ac *authController) Register(c *gin.Context) {
 		return
 	}
 
+	//hash password
+	pass, err := helper.HashPassword(payload.Password)
+	if err != nil {
+		log.Println("Hash password error:", err)
+		c.JSON(500, gin.H{"error": "failed register user"})
+		return
+	}
+
 	user := &model.AuthUser{}
 	user.ID = helper.NewUUID()
 	user.Email = payload.Email
-	user.Password = payload.Password
+	user.Password = pass
 
-	err := ac.auth.Register(user)
-
-	if err != nil {
+	if err := ac.auth.Register(user); err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			log.Println("register error:", err)
+			c.JSON(500, gin.H{"error": "email already exist"})
+			return
+		}
 		log.Println("DB error:", err)
 		c.JSON(500, gin.H{"error": "internal server error"})
 		return
 	}
-
-	// regReq := &helper.AuthUser{
-	// 	ID:    user.ID,
-	// 	Email: user.Email,
-	// }
-
-	// token, err := helper.GenerateToken(regReq)
-
-	// if err != nil {
-	// 	log.Println("error:", err)
-	// 	c.JSON(500, gin.H{"error": "failed generate token"})
-	// 	return
-	// }
 
 	c.JSON(200, &RegisterResponse{
 		Message: "success",
@@ -86,11 +85,16 @@ func (ac *authController) Login(c *gin.Context) {
 	user.Email = payload.Email
 	user.Password = payload.Password
 
-	_, err := ac.auth.Login(user)
+	userLogin, err := ac.auth.Login(user)
 
 	if err != nil {
 		log.Println("DB error:", err)
-		c.JSON(500, gin.H{"error": "internal server error"})
+		c.JSON(401, gin.H{"message": "email not found"})
+		return
+	}
+
+	if !helper.CheckHashPassword(userLogin.Password, payload.Password) {
+		c.JSON(401, gin.H{"message": "wrong password"})
 		return
 	}
 
