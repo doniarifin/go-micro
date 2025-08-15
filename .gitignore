@@ -16,7 +16,7 @@
 vendor/
 
 # IDE/editor files
-.vscode/
+# .vscode/
 .idea/
 *.swp
 *.swo
