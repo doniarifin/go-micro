@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run NATS",
+      "type": "shell",
+      "command": "nats-server --jetstream",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Caddy",
+      "type": "shell",
+      "command": "caddy",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "--config=data/Caddyfile"
+      ]
+    },
+    {
+      "label": "Run All Task",
+      "dependsOn": [
+        "Run NATS",
+        "Run Caddy",
+      ],
+      "dependsOrder": "parallel"
+    }
+  ]
+}

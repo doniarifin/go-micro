@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Auth Service",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/app/auth/main.go"
+    },
+    {
+      "name": "Run Message Service",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/app/msg/main.go"
+    },
+    {
+      "name": "Run Order Service",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/app/order/main.go"
+    }
+  ],
+
+  "compounds": [
+    {
+      "name": "Run All Services ",
+      "configurations": [
+        "Run Auth Service",
+        "Run Message Service",
+        "Run Order Service"
+      ]
+    }
+  ]
+}
