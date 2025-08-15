@@ -46,7 +46,7 @@ func (r *authRepository) FindByID(u *AuthUser) (*AuthUser, error) {
 
 func (r *authRepository) FindByEmail(u *AuthUser) (*AuthUser, error) {
 	var user AuthUser
-	if err := r.db.Where(&AuthUser{Email: u.Email}).First(&user); err != nil {
+	if err := r.db.Where(&AuthUser{Email: u.Email}).First(&user); err.Error != nil {
 		return nil, err.Error
 	}
 	return &user, nil
