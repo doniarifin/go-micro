@@ -1,0 +1,6 @@
+http://localhost:8000 {
+	#ReverseProxy
+	reverse_proxy /auth/* localhost:8001
+	reverse_proxy /msg/* localhost:8002
+	reverse_proxy /order/* localhost:8003
+}
