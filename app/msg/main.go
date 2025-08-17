@@ -1,18 +1,48 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	rabbitmq "go-micro/config"
+	"go-micro/controller"
+	db "go-micro/db/connection"
+	"go-micro/model"
+	"go-micro/service"
+	"log"
+
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
+	db, err := db.ConnectDB()
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	if err := rabbitmq.Connect(); err != nil {
+		return
+	}
+
+	defer rabbitmq.CloseConnection()
+
+	go func() {
+		if err := rabbitmq.Consume("email", db); err != nil {
+			return
+		}
+	}()
+
+	msg := model.NewMsgRepository(db)
+	msgService := service.NewMsgService(msg)
+	msgController := controller.NewMsgController(msgService)
+
 	r := gin.Default()
 	app := r.Group("/msg")
 
 	{
-		app.GET("/ping", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"message": "pong",
-			})
-		})
+		app.POST("/save", msgController.Save)
+		app.POST("/gets", msgController.Gets)
+		app.POST("/delete", msgController.Delete)
 	}
-	// r.GET()
+
 	r.Run(":8002")
 }

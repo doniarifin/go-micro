@@ -1,6 +1,7 @@
 package main
 
 import (
+	rabbitmq "go-micro/config"
 	"go-micro/controller"
 	db "go-micro/db/connection"
 	"go-micro/model"
@@ -15,6 +16,10 @@ func main() {
 
 	if err != nil {
 		log.Fatalln("cannot connet DB: ", err)
+		return
+	}
+
+	if err := rabbitmq.Connect(); err != nil {
 		return
 	}
 

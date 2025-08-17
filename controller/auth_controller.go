@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"encoding/json"
+	rabbitmq "go-micro/config"
 	"go-micro/model"
 	"go-micro/service"
 	helper "go-micro/utils"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,6 +59,24 @@ func (ac *authController) Register(c *gin.Context) {
 		}
 		log.Println("DB error:", err)
 		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	msg := &model.Message{}
+	msg.Sender = "system"
+	msg.Receiver = user.Email
+	msg.MsgType = "email"
+	msg.MsgBody = "created account success"
+	msg.CreatedBy = user.Email
+	msg.CreatedAt = time.Now()
+	msg.UpdateAt = time.Now()
+
+	msgJSON, err := json.Marshal(msg)
+	if err != nil {
+		return
+	}
+
+	if err := rabbitmq.Publish("email", string(msgJSON)); err != nil {
 		return
 	}
 
