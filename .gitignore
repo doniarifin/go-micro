@@ -33,4 +33,7 @@ Thumbs.db
 
 # Environment files
 .env
-.yaml
+
+# Ignore all yaml/yml files
+*.yaml
+*.yml
