@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS orders (
   product_id VARCHAR(100) NOT NULL,
   product_name VARCHAR(100),
   order_by VARCHAR(100) NOT NULL,
-  date date,
-  created_at date,
+  date datetime,
+  created_at datetime,
   PRIMARY KEY (id)
 );

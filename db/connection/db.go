@@ -14,7 +14,7 @@ import (
 )
 
 func ConnectDB() (*gorm.DB, error) {
-	dsn := "user:xxxxxx@tcp(127.0.0.1:3306)/golang?multiStatements=true"
+	dsn := "user:xxxxxx@tcp(127.0.0.1:3306)/golang?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
 	sqlDB, err := sql.Open("mysql", dsn)
 
 	if err != nil {

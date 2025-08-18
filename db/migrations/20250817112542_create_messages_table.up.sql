@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS messages (
   msg_type VARCHAR(50),
   msg_body VARCHAR(100),
   created_by VARCHAR(100),
-  created_at date,
-  update_at date,
+  created_at datetime,
+  update_at datetime,
   PRIMARY KEY (id)
 );
