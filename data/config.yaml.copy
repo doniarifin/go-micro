@@ -13,7 +13,7 @@ gateway:
 database:
   host: localhost
   port: port
-  dbname: myapp
+  dbname: dbname
   user: user
   pass: pass
 rabbitmq:
