@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"go-micro/config/config"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
@@ -13,9 +14,26 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *sql.DB
+
 func ConnectDB() (*gorm.DB, error) {
-	dsn := "user:xxxxxx@tcp(127.0.0.1:3306)/golang?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
+
+	cfg := config.Load()
+
+	host := cfg.Database.Host
+	port := cfg.Database.Port
+	name := cfg.Database.DBName
+	user := cfg.Database.User
+	pass := cfg.Database.Pass
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true",
+		user, pass, host, port, name,
+	)
+
+	// dsn := "user:xxxxxx@tcp(127.0.0.1:3306)/golang?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
 	sqlDB, err := sql.Open("mysql", dsn)
+
+	DB = sqlDB
 
 	if err != nil {
 		return nil, err
@@ -51,4 +69,10 @@ func ConnectDB() (*gorm.DB, error) {
 	// migrate -path db/migrations -database "mysql://user:xxxxxx@tcp(localhost:3306)/golang" up
 
 	return gormDB, err
+}
+
+func CloseConnection() {
+	if DB != nil {
+		DB.Close()
+	}
 }

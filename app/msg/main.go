@@ -13,12 +13,14 @@ import (
 )
 
 func main() {
-	db, err := db.ConnectDB()
+	dbConn, err := db.ConnectDB()
 
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+
+	defer db.CloseConnection()
 
 	if err := rabbitmq.Connect(); err != nil {
 		return
@@ -27,12 +29,13 @@ func main() {
 	defer rabbitmq.CloseConnection()
 
 	go func() {
-		if err := rabbitmq.Consume("email", db); err != nil {
+		if err := rabbitmq.Consume("email", dbConn); err != nil {
+			log.Println("Error consuming RabbitMQ:", err)
 			return
 		}
 	}()
 
-	msg := model.NewMsgRepository(db)
+	msg := model.NewMsgRepository(dbConn)
 	msgService := service.NewMsgService(msg)
 	msgController := controller.NewMsgController(msgService)
 

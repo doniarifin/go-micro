@@ -12,18 +12,19 @@ import (
 )
 
 func main() {
-	db, err := db.ConnectDB()
-
+	dbconn, err := db.ConnectDB()
 	if err != nil {
 		log.Fatalln("cannot connet DB: ", err)
 		return
 	}
+	defer db.CloseConnection()
 
 	if err := rabbitmq.Connect(); err != nil {
 		return
 	}
+	defer rabbitmq.CloseConnection()
 
-	userModel := model.NewAuthRepository(db)
+	userModel := model.NewAuthRepository(dbconn)
 	userService := service.NewAuthService(userModel)
 	userController := controller.NewAuthController(userService)
 

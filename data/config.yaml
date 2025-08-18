@@ -10,3 +10,12 @@ gateway:
     - name: Order
       context: /order
       target: http://localhost:8003
+database:
+  host: localhost
+  port: port
+  dbname: myapp
+  user: user
+  pass: pass
+rabbitmq:
+  url: amqp://guest:guest@localhost:5672/
+  queue: myapp_queue

@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"context"
 	"encoding/json"
+	"go-micro/config/config"
 	"go-micro/model"
 	"go-micro/service"
 	"log"
@@ -19,9 +20,15 @@ func FailOnError(err error, msg string) {
 }
 
 var Connection *amqp.Connection
+var channel *amqp.Channel
 
 func Connect() error {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+
+	cfg := config.Load()
+
+	URL := cfg.RabbitMQ.URL
+
+	conn, err := amqp.Dial(URL)
 	FailOnError(err, "Failed to connect to RabbitMQ")
 	// defer conn.Close()
 
@@ -33,7 +40,7 @@ func Connect() error {
 func Publish(queue string, msg string) error {
 	ch, err := Connection.Channel()
 	FailOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	// defer ch.Close()
 	q, err := ch.QueueDeclare(
 		queue, // name
 		false, // durable
@@ -60,13 +67,16 @@ func Publish(queue string, msg string) error {
 	FailOnError(err, "Failed to publish a message")
 	log.Printf(" [x] Sent %s\n", body)
 
+	channel = ch
+
 	return err
 }
 
 func Consume(queue string, db *gorm.DB) error {
 	ch, err := Connection.Channel()
+	channel = ch
 	FailOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	// defer ch.Close()
 	q, err := ch.QueueDeclare(
 		queue, // name
 		false, // durable
@@ -80,7 +90,7 @@ func Consume(queue string, db *gorm.DB) error {
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		true,   // auto-ack
+		false,  // auto-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -88,32 +98,41 @@ func Consume(queue string, db *gorm.DB) error {
 	)
 	FailOnError(err, "Failed to register a consumer")
 
-	// var forever chan struct{}
-	goChan := make(chan string)
+	channel = ch
+
+	forever := make(chan struct{})
+	// goChan := make(chan string)
 
 	go func() {
 		for d := range msgs {
 			var message *model.Message
 			if err := json.Unmarshal(d.Body, &message); err != nil {
+				log.Println("Error unmarshal body:", err)
 				continue
 			}
 			msg := model.NewMsgRepository(db)
 			msgService := service.NewMsgService(msg)
 			if err := msgService.Insert(message); err != nil {
+				log.Println("Error inser message:", err)
 				continue
 			}
 			log.Printf(" [x] %s", d.Body)
-			goChan <- string(d.Body)
+			// goChan <- string(d.Body)
 		}
 	}()
 
 	// log.Printf(" [*] Waiting for logs. To exit press CTRL+C")
-	<-goChan
+	// <-goChan
+	<-forever
+
 	return nil
 }
 
 func CloseConnection() {
 	if Connection != nil {
 		Connection.Close()
+	}
+	if channel != nil {
+		channel.Close()
 	}
 }
