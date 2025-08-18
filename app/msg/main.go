@@ -4,6 +4,7 @@ import (
 	rabbitmq "go-micro/config"
 	"go-micro/controller"
 	db "go-micro/db/connection"
+	"go-micro/middleware"
 	"go-micro/model"
 	"go-micro/service"
 	"log"
@@ -38,9 +39,11 @@ func main() {
 	r := gin.Default()
 	app := r.Group("/msg")
 
+	app.Use(middleware.JWTMiddleware("admin"))
+
 	{
 		app.POST("/save", msgController.Save)
-		app.POST("/gets", msgController.Gets)
+		app.POST("/gets/:id", msgController.Get)
 		app.POST("/delete", msgController.Delete)
 	}
 

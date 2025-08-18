@@ -20,7 +20,7 @@ type Message struct {
 
 type MessageRepo interface {
 	Insert(model *Message) error
-	Gets(model *Message) error
+	Get(model *Message) error
 	Delete(model *Message) error
 }
 
@@ -39,8 +39,8 @@ func (d *messageRepo) Insert(model *Message) error {
 	return d.db.Save(model).Error
 }
 
-func (d *messageRepo) Gets(model *Message) error {
-	return d.db.Find(&model).Error
+func (d *messageRepo) Get(model *Message) error {
+	return d.db.First(&model).Error
 }
 
 func (d *messageRepo) Delete(model *Message) error {

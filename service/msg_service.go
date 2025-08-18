@@ -4,7 +4,7 @@ import "go-micro/model"
 
 type MsgService interface {
 	Insert(*model.Message) error
-	Gets(*model.Message) (*model.Message, error)
+	Get(*model.Message) (*model.Message, error)
 	Delete(*model.Message) error
 }
 
@@ -19,8 +19,8 @@ func NewMsgService(repo model.MessageRepo) MsgService {
 func (s *msgService) Insert(model *model.Message) error {
 	return s.repo.Insert(model)
 }
-func (s *msgService) Gets(model *model.Message) (*model.Message, error) {
-	err := s.repo.Gets(model)
+func (s *msgService) Get(model *model.Message) (*model.Message, error) {
+	err := s.repo.Get(model)
 	if err != nil {
 		return nil, err
 	}

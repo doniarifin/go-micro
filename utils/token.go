@@ -2,7 +2,7 @@ package helper
 
 import (
 	"errors"
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -30,7 +30,7 @@ func GenerateToken(s *AuthUser) (string, error) {
 		s.Email,
 		s.Role,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			Issuer:    s.ID,
 		},
 	}
@@ -45,18 +45,21 @@ func GenerateToken(s *AuthUser) (string, error) {
 	return ss, nil
 }
 
-func VerifyToken(tokenString string) error {
+func VerifyToken(tokenString string) (*CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(tokenString *jwt.Token) (any, error) {
 		return []byte("AllYourBase"), nil
 	})
 
 	if err != nil {
-		log.Fatal(err)
-		return err
-	} else if _, ok := token.Claims.(*CustomClaims); ok {
-		// fmt.Println(claims.Email, claims.Issuer)
-		return nil
-	} else {
-		return errors.New("unknown claims type, failed proceed")
+		// log.Fatal(err)
+		fmt.Println(err)
+		return nil, err
 	}
+
+	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+		// fmt.Println(claims.Email, claims.Issuer)
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid token")
 }

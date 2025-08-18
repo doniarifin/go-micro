@@ -43,12 +43,16 @@ func (ctrl *msgController) Save(c *gin.Context) {
 	})
 }
 
-func (ctrl *msgController) Gets(c *gin.Context) {
+func (ctrl *msgController) Get(c *gin.Context) {
 	ID := c.Param("id")
 
-	data, err := ctrl.service.Gets(&model.Message{ID: ID})
+	data, err := ctrl.service.Get(&model.Message{ID: ID})
 
 	if err != nil {
+		c.JSON(500, gin.H{
+			"message": "failed",
+			"error":   err.Error(),
+		})
 		return
 	}
 
