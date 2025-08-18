@@ -2,7 +2,7 @@ package helper
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -51,8 +51,8 @@ func VerifyToken(tokenString string) (*CustomClaims, error) {
 	})
 
 	if err != nil {
-		// log.Fatal(err)
-		fmt.Println(err)
+		log.Fatal(err)
+		// fmt.Println(err)
 		return nil, err
 	}
 
